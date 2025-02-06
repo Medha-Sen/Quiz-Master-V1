@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Quiz Master</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome to Quiz Master</h2>
+        <h3 class="subheading">Login</h3>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <label for="username">Username (E-mail):</label>
+            {{ form.username }}
+
+            <label for="password">Password:</label>
+            {{ form.password }}
+
+            <br>
+            <div class="form-buttons">
+                {{ form.submit(class="btn") }}
+                <a href="{{ url_for('register') }}" class="new-user-btn">Create new user?</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

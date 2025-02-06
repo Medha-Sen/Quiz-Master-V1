@@ -21,6 +21,17 @@ class User(db.Model):
     qualification=db.Column(db.String(100))
     dob=db.Column(db.Date)
     scores = db.relationship('Scores', backref='user', lazy=True)
+    def is_active(self):
+        return True  # Admin users are always active
+
+    def is_authenticated(self):
+        return True  # Admin users are always authenticated
+
+    def is_anonymous(self):
+        return False  # Admins are never anonymous
+
+    def get_id(self):
+        return str(self.id) 
     def __repr__(self):
         return f"<User(id='{self.id}', username='{self.username}')>"
 class Admin(db.Model):
@@ -30,7 +41,17 @@ class Admin(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     username=db.Column(db.String(100), unique=True, nullable=False)
     password=db.Column(db.String(100), nullable=False)
+    def is_active(self):
+        return True  # Admin users are always active
 
+    def is_authenticated(self):
+        return True  # Admin users are always authenticated
+
+    def is_anonymous(self):
+        return False  # Admins are never anonymous
+
+    def get_id(self):
+        return str(self.id) 
     def __repr__(self):
         return f"<Admin(id='{self.id}', username='{self.username}')>"
 class Subject(db.Model):
@@ -66,7 +87,7 @@ class Quiz(db.Model):
     time_duration=db.Column(db.String(10))
     remarks=db.Column(db.Text)
     questions=db.relationship('Questions', backref='quiz', lazy=True)
-    scores=db.relationship('Score', backref='quiz', lazy=True)
+    scores=db.relationship('Scores', backref='quiz', lazy=True)
     def __repr__(self):
         return f"<Quiz(id='{self.id}', date_of_quiz='{self.date_of_quiz}')>"
 class Questions(db.Model):
