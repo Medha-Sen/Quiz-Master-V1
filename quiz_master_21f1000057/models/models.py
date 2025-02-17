@@ -31,7 +31,7 @@ class User(db.Model):
         return False  # Admins are never anonymous
 
     def get_id(self):
-        return str(self.id) 
+        return str(self.id)
     def __repr__(self):
         return f"<User(id='{self.id}', username='{self.username}')>"
 class Admin(db.Model):
@@ -51,7 +51,7 @@ class Admin(db.Model):
         return False  # Admins are never anonymous
 
     def get_id(self):
-        return str(self.id) 
+        return str(self.id)
     def __repr__(self):
         return f"<Admin(id='{self.id}', username='{self.username}')>"
 class Subject(db.Model):
@@ -88,6 +88,12 @@ class Quiz(db.Model):
     remarks=db.Column(db.Text)
     questions=db.relationship('Questions', backref='quiz', lazy=True)
     scores=db.relationship('Scores', backref='quiz', lazy=True)
+    def get_subject_name(self):
+        return self.chapter.subject.name
+    def get_chapter_name(self):
+        return self.chapter.name
+    def num_questions(self):
+        return len(self.questions)
     def __repr__(self):
         return f"<Quiz(id='{self.id}', date_of_quiz='{self.date_of_quiz}')>"
 class Questions(db.Model):
@@ -98,6 +104,7 @@ class Questions(db.Model):
     #correct option
     id=db.Column(db.Integer, primary_key=True)
     quiz_id=db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
+    question_title=db.Column(db.String(100), nullable=False)
     question_statement=db.Column(db.Text,nullable=False)
     option1=db.Column(db.String(300), nullable=False)
     option2=db.Column(db.String(300), nullable=False)

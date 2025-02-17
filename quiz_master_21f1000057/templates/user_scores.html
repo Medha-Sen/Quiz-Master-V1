@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
+    <title>Scores</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
@@ -22,44 +22,41 @@
             <!-- Search Bar -->
             <form class="search-container d-flex">
                 <input type="text" class="form-control search-input" placeholder="Search">
-                <button type="submit" class="btn search-button">
-                    🔍
-                </button>
+                <button type="submit" class="btn search-button">🔍</button>
             </form>
 
             <span class="user-welcome">Welcome {{ current_user.name }}</span>
         </div>
     </nav>
 
-    <!-- Upcoming Quizzes Section -->
+    <!-- Quiz Scores Table -->
     <div class="container mt-4">
-        <h3 class="text-center">Upcoming Quizzes</h3>
+        <h3 class="text-center">Quiz Scores</h3>
 
+        {% if quiz_scores %}
         <table class="table table-bordered text-center mt-3">
             <thead class="table-light">
                 <tr>
                     <th>ID</th>
                     <th>No. of Questions</th>
                     <th>Date</th>
-                    <th>Duration (hh:mm)</th>
-                    <th>Action</th>
+                    <th>Score</th>
                 </tr>
             </thead>
             <tbody>
-                {% for quiz in upcoming_quizzes %}
+                {% for quiz in quiz_scores %}
                 <tr>
                     <td>{{ quiz.id }}</td>
-                    <td>{{ quiz.num_questions() }}</td>
-                    <td>{{ quiz.date_of_quiz.strftime('%d/%m/%Y') }}</td>  <!-- ✅ Correct -->
-                    <td>{{ quiz.time_duration }}</td>
-                    <td>
-                        <a href="{{ url_for('quiz_info', quiz_id=quiz.id) }}" class="btn btn-primary btn-sm">View</a>
-                        <a href="{{ url_for('start_quiz', quiz_id=quiz.id, question_index=0) }}" class="btn btn-success btn-sm">Start</a>
-                    </td>
+                    <td>{{ quiz.num_questions }}</td>
+                    <td>{{ quiz.date }}</td>
+                    <td>{{ quiz.score }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <p class="text-center mt-4">No quizzes attempted yet.</p>
+        {% endif %}
     </div>
 
 </body>

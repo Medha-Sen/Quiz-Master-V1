@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Summary</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f4f7fc;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 30px;
+        }
+        .table th, .table td {
+            text-align: center;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .btn-back {
+            display: block;
+            margin: 30px auto;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>User Summary</h1>
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Subject Name</th>
+                <th>Chapter Name</th>
+                <th>Total Marks (Questions)</th>
+                <th>Number of Attempts</th>
+                <th>Highest Score</th>
+                <th>Average Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for quiz in quiz_scores %}
+            <tr>
+                <td>{{ quiz.subject_name }}</td>
+                <td>{{ quiz.chapter_name }}</td>
+                <td>{{ quiz.total_questions }}</td>
+                <td>{{ quiz.num_attempts }}</td>
+                <td>{{ quiz.highest_score }}</td>
+                <td>{{ quiz.average_score }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('user_dashboard') }}" class="btn btn-primary btn-back">Back to Dashboard</a>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+</body>
+</html>
