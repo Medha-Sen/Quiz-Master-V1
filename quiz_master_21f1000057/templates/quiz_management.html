@@ -20,8 +20,8 @@
             </div>
 
             <!-- Search Bar -->
-            <form class="search-container d-flex">
-                <input type="text" class="form-control search-input" placeholder="Search quizzes, subjects, or users">
+            <form class="search-container d-flex" action="{{ url_for('quiz_management') }}" method="POST">
+                <input type="text" class="form-control search-input" name="search_query" placeholder="Search by Quiz ID or question..." value="{{ search_query }}">
                 <button type="submit" class="btn search-button">🔍</button>
             </form>
 
@@ -32,10 +32,16 @@
     <div class="container mt-4">
         <h2 class="text-center text-primary">Quiz Management</h2>
 
+        {% if error %}
+            <div class="alert alert-danger">
+                {{ error }}
+            </div>
+        {% endif %}
+
         {% if quizzes %}
             {% set quizzes_by_subject = {} %}
             {% for quiz in quizzes %}
-                {% set _ = quizzes_by_subject.setdefault(quiz.subject, []).append(quiz) %}
+                {% set _ = quizzes_by_subject.setdefault(quiz.get_subject_name(), []).append(quiz) %}
             {% endfor %}
 
             {% for subject, quizzes_list in quizzes_by_subject.items() %}
@@ -96,13 +102,14 @@
         {% else %}
             <p class="text-center text-muted">No quizzes available. Start by adding a new quiz.</p>
         {% endif %}
-    </div>
 
-    <!-- Add Quiz Section -->
-    <div class="text-center mt-4">
-        <form action="{{ url_for('add_quiz') }}" method="POST">
-            <button type="submit" class="btn btn-success">+ New Quiz</button>
-        </form>
+        <!-- Go Back to Home Button (Only Show if Search is Conducted) -->
+        {% if search_query %}
+        <div class="text-center mt-4">
+            <a href="{{ url_for('quiz_management') }}" class="btn btn-primary">Go Back to Home</a>
+        </div>
+        {% endif %}
+
     </div>
 
 </body>

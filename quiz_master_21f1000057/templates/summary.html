@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summary Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/summary.css') }}">
+</head>
+<body>
+
+<!-- Navigation -->
+<div class="navbar">
+    <a href="{{ url_for('summary') }}" class="nav-link">Summary</a>
+</div>
+
+<!-- Search Bar -->
+<div class="search-container">
+    <form method="POST" action="{{ url_for('summary') }}">
+        <input type="text" name="user_id" placeholder="Enter User ID" required class="search-input">
+        <button type="submit" class="search-button">Search</button>
+    </form>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="error-banner">
+            {% for category, message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<!-- User List Table -->
+<div class="table-container">
+    <h3>User List</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>User Name</th>
+                <th>User Email</th>
+                <th>Password</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td><a href="{{ url_for('user_summary', user_id=user.id) }}">{{ user.id }}</a></td>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.password }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Display the Chart Image -->
+<div class="chart-container">
+    <h3>Highest Scores per Subject</h3>
+    <img src="data:image/png;base64,{{ chart_image }}" alt="Highest Scores Chart" class="chart-image">
+</div>
+
+<!-- Back to Home Button -->
+<div class="back-button-container">
+    <a href="{{ url_for('admin_dashboard') }}" class="back-button">Back to Home</a>
+</div>
+
+</body>
+</html>

@@ -15,16 +15,15 @@
             <div class="nav-links">
                 <a href="{{ url_for('admin_dashboard') }}">Home</a> |
                 <a href="{{ url_for('quiz_management') }}">Quiz</a> |
-                <a href="#">Summary</a> |
+                <a href="{{ url_for('summary') }}" class="btn-primary">Summary</a> |
                 <a href="{{ url_for('logout') }}">Logout</a>
             </div>
 
             <!-- Search Bar -->
-            <form class="search-container d-flex">
-                <input type="text" class="form-control search-input" placeholder="Search">
-                <button type="submit" class="btn search-button">
-                    🔍
-                </button>
+            <form action="{{ url_for('admin_dashboard') }}" method="GET" class="search-container d-flex">
+                <input type="text" class="form-control search-input" name="search" 
+                       placeholder="Search for Subjects and Chapter Names">
+                <button type="submit" class="btn search-button">🔍</button>
             </form>
 
             <span class="admin-welcome">Welcome Admin</span>
@@ -32,56 +31,54 @@
     </nav>
 
     <div class="container">
-        <div class="row justify-content-center">
-            {% for subject in subjects %}
-            <div class="col-md-6 mb-5">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span>{{ subject.name }}</span>
-                        <div>
-                            <a href="{{ url_for('edit_subject', subject_id=subject.id) }}" class="text-warning me-3">Edit</a>
-                            <a href="{{ url_for('delete_subject', subject_id=subject.id) }}" class="text-danger">Delete</a>
+        {% if not subjects %}
+            <h2 class="text-center text-danger mt-5">404 Not Found</h2>
+            <div class="text-center">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Go Back to Home</a>
+            </div>
+        {% else %}
+            <div class="row justify-content-center">
+                {% for subject in subjects %}
+                <div class="col-md-6 mb-5">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>{{ subject.name }}</span>
+                            <div>
+                                <a href="{{ url_for('edit_subject', subject_id=subject.id) }}" class="text-warning me-3">Edit</a>
+                                <a href="{{ url_for('delete_subject', subject_id=subject.id) }}" class="text-danger">Delete</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Chapter Name</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for chapter in subject.chapters %}
+                                    <tr>
+                                        <td>{{chapter.id }}</td>
+                                        <td>{{ chapter.name }}</td>
+                                        <td>
+                                            <a href="{{ url_for('edit_chapter', chapter_id=chapter.id) }}" class="text-warning">Edit</a> /
+                                            <a href="{{ url_for('delete_chapter', chapter_id=chapter.id) }}" class="text-danger">Delete</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <form action="{{ url_for('add_chapter', subject_id=subject.id) }}" method="POST">
+                                <button type="submit" class="btn btn-add-chapter">+ Chapter</button>
+                            </form>                        
                         </div>
                     </div>
-                    <div class="card-body">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Chapter Name</th>
-                                    <th>No. of Questions</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for chapter in subject.chapters %}
-                                <tr>
-                                    <td>{{ chapter.name }}</td>
-                                    <td>{{ chapter.num_questions }}</td>
-                                    <td>
-                                        <a href="{{ url_for('edit_chapter', chapter_id=chapter.id) }}" class="text-warning">Edit</a> /
-                                        <a href="{{ url_for('delete_chapter', chapter_id=chapter.id) }}" class="text-danger">Delete</a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        <form action="{{ url_for('add_chapter', subject_id=subject.id) }}" method="POST">
-                            <button type="submit" class="btn btn-add-chapter">+ Chapter</button>
-                        </form>                        
-                    </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </div>
-    
-
-    <div class="all-subjects">Add a subject ...</div>
-
-    <div class="add-subject">
-        <form action="{{ url_for('add_subject') }}" method="POST">
-            <button type="submit">+</button>
-        </form>
+        {% endif %}
     </div>
 
 </body>

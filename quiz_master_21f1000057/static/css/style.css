@@ -1,3 +1,4 @@
+/* General Body Styling */
 body {
     background-color: #f9f9f9;
     font-family: Arial, sans-serif;
@@ -298,6 +299,7 @@ body {
 .submit-btn:hover {
     background-color: #218838;
 }
+
 .prev-btn {
     background-color: #ffa07a;  /* Light Salmon */
     color: white;
@@ -312,11 +314,14 @@ body {
 .prev-btn:hover {
     background-color: #ff7f50;  /* Coral */
 }
+
+/* User Welcome */
 .user-welcome {
     font-weight: bold;
     margin-left: 10px;
 }
 
+/* Table Styling */
 table {
     border-radius: 8px;
     overflow: hidden;
@@ -325,4 +330,57 @@ table {
 th {
     background-color: #e3f2fd;
     font-weight: bold;
+}
+
+/* Additional General Styles for Alert, etc. */
+.alert {
+    background-color: #e74c3c;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.chart-container {
+    text-align: center;
+}
+
+.table-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+table {
+    width: 80%;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+table th {
+    background-color: #3498db;
+    color: white;
+}
+
+.back-button {
+    display: block;
+    width: 200px;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #2ecc71;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.back-button:hover {
+    background-color: #27ae60;
 }

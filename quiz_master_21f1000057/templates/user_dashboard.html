@@ -15,26 +15,40 @@
             <div class="nav-links">
                 <a href="{{ url_for('user_dashboard') }}">Home</a> |
                 <a href="{{ url_for('user_scores') }}">Scores</a> |
-                <a href="{{ url_for('user_summary') }}">Summary</a> |
+                <a href="{{ url_for('user_summary',user_id=user_id) }}">Summary</a> |
                 <a href="{{ url_for('logout') }}">Logout</a>
             </div>
 
             <!-- Search Bar -->
-            <form class="search-container d-flex">
-                <input type="text" class="form-control search-input" placeholder="Search">
+            <form class="search-container d-flex" method="GET" action="{{ url_for('user_dashboard') }}">
+                <input type="text" class="form-control search-input" name="search" placeholder="Search for Subjects and Chapter Names" value="{{ request.args.get('search', '') }}">
                 <button type="submit" class="btn search-button">
                     🔍
                 </button>
             </form>
 
+
             <span class="user-welcome">Welcome {{ current_user.name }}</span>
         </div>
     </nav>
+
+    <!-- Back Button (only visible when search query exists) -->
+    {% if request.args.get('search') %}
+    <div class="container mt-3">
+        <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">Back to All Quizzes</a>
+    </div>
+    {% endif %}
 
     <!-- Upcoming Quizzes Section -->
     <div class="container mt-4">
         <h3 class="text-center">Upcoming Quizzes</h3>
 
+        <!-- Display 404 if no quizzes found -->
+        {% if not upcoming_quizzes %}
+        <div class="alert alert-danger text-center" role="alert">
+            404 Not Found: No quizzes found for the searched Subject or Chapter.
+        </div>
+        {% else %}
         <table class="table table-bordered text-center mt-3">
             <thead class="table-light">
                 <tr>
@@ -50,7 +64,7 @@
                 <tr>
                     <td>{{ quiz.id }}</td>
                     <td>{{ quiz.num_questions() }}</td>
-                    <td>{{ quiz.date_of_quiz.strftime('%d/%m/%Y') }}</td>  <!-- ✅ Correct -->
+                    <td>{{ quiz.date_of_quiz.strftime('%d/%m/%Y') }}</td>
                     <td>{{ quiz.time_duration }}</td>
                     <td>
                         <a href="{{ url_for('quiz_info', quiz_id=quiz.id) }}" class="btn btn-primary btn-sm">View</a>
@@ -60,6 +74,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% endif %}
     </div>
 
 </body>
