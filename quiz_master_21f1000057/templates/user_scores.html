@@ -15,7 +15,7 @@
             <div class="nav-links">
                 <a href="{{ url_for('user_dashboard') }}">Home</a> |
                 <a href="{{ url_for('user_scores') }}">Scores</a> |
-                <a href="{{ url_for('user_summary') }}">Summary</a> |
+                <a href="{{ url_for('user_summary',user_id=user_id) }}">Summary</a> |
                 <a href="{{ url_for('logout') }}">Logout</a>
             </div>
 

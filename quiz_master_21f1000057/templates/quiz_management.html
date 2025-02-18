@@ -54,6 +54,7 @@
                                 <a href="{{ url_for('quiz_details', quiz_id=quiz.id) }}" class="fw-bold text-primary text-decoration-none">
                                     {{ quiz.get_subject_name() }} Quiz: {{ quiz.get_chapter_name() }}
                                 </a>
+                                <a href="{{ url_for('edit_quiz', quiz_id=quiz.id) }}">Edit</a>
                                 <a href="{{ url_for('delete_quiz', quiz_id=quiz.id) }}" class="text-danger">Delete</a>
                             </div>
                             <div class="card-body">

@@ -335,6 +335,59 @@ def quiz_details(quiz_id):
         return redirect(url_for('quiz_management'))
 
     return render_template('quiz_details.html', quiz=quiz)
+#editting the quiz
+
+from datetime import datetime
+
+@app.route('/edit_quiz/<int:quiz_id>', methods=['GET', 'POST'])
+def edit_quiz(quiz_id):
+    quiz = Quiz.query.get_or_404(quiz_id)  # Fetch quiz by ID
+
+    if request.method == 'POST':
+        # Get form data and make sure field names match the HTML form
+        date_str = request.form.get('date_of_quiz')
+        duration = request.form.get('time_duration')
+        remarks = request.form.get('remarks')
+
+        # Debugging: Check if the form data is being passed correctly
+        print(f"Form data received: date_of_quiz={date_str}, time_duration={duration}, remarks={remarks}")
+
+        if not date_str or not duration:
+            flash("Date and Duration are required!", "danger")
+            return redirect(url_for('edit_quiz', quiz_id=quiz_id))
+
+        try:
+            # Convert the date string (yyyy-mm-dd) to a Python date object
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+
+            # Update the quiz fields
+            quiz.date_of_quiz = date_obj
+            quiz.time_duration = duration
+            quiz.remarks = remarks if remarks else None
+
+            # Commit the changes to the database
+            db.session.commit()
+
+            # Debugging: Print updated quiz details
+            updated_quiz = Quiz.query.get(quiz.id)
+            print(f"Updated Quiz in DB: {updated_quiz.date_of_quiz}, {updated_quiz.time_duration}, {updated_quiz.remarks}")
+
+            flash("Quiz updated successfully.", "success")
+            # After successful update, redirect to quiz management page
+            return redirect(url_for('quiz_management'))
+
+        except ValueError:
+            flash("Invalid date format! Use yyyy-mm-dd.", "danger")
+        except Exception as e:
+            flash(f"Error: {str(e)}", "danger")
+            db.session.rollback()  # Rollback if there's an error
+
+        return redirect(url_for('edit_quiz', quiz_id=quiz_id))
+
+    # Fetch available chapters for the dropdown
+    chapters = db.session.query(Chapter.id, Chapter.name).all()
+
+    return render_template('edit_quiz.html', quiz=quiz, chapters=chapters)
 
 # deleting a quiz
 @app.route('/delete_quiz/<int:quiz_id>', methods=['GET', 'POST'])
@@ -412,7 +465,7 @@ def delete_question(question_id):
 def quiz_info(quiz_id):
     quiz = Quiz.query.get_or_404(quiz_id)  # Fetch quiz or return 404 if not found
     return render_template('quiz_info.html', quiz=quiz)
-from datetime import timedelta
+from datetime import timedelta, datetime
 @app.route('/start-quiz/<int:quiz_id>/<int:question_index>', methods=['GET', 'POST'])
 @login_required
 def start_quiz(quiz_id, question_index):
@@ -429,9 +482,35 @@ def start_quiz(quiz_id, question_index):
 
     current_question = questions[question_index]
 
-    # **Reset previous selections ONLY if accessed from user dashboard**
+    # Reset timer when navigating from user dashboard
     if request.referrer and url_for('user_dashboard') in request.referrer:
-        session.pop(f'quiz_{quiz_id}_answers', None)  # Erase answers if coming from Dashboard
+        session.pop(f'quiz_{quiz_id}_start_time', None)  # Reset the start time
+
+    # Parse time_duration (stored as "hh:mm") from the database
+    hours, minutes = map(int, quiz.time_duration.split(":"))  # Convert to integers
+
+    # Initialize timer if not set
+    if f'quiz_{quiz_id}_start_time' not in session:
+        session[f'quiz_{quiz_id}_start_time'] = datetime.utcnow().isoformat()
+
+    # Retrieve start time from session
+    start_time = datetime.fromisoformat(session[f'quiz_{quiz_id}_start_time'])
+    total_duration = timedelta(hours=hours, minutes=minutes)  # Use parsed duration
+    end_time = start_time + total_duration
+
+    # Calculate remaining time
+    remaining_time = max(end_time - datetime.utcnow(), timedelta(seconds=0))
+    remaining_minutes, remaining_seconds = divmod(remaining_time.seconds, 60)
+    formatted_time = f"{remaining_minutes:02}:{remaining_seconds:02}"
+
+    # Redirect to results if time is over
+    if remaining_time.total_seconds() <= 0:
+        flash("Time over", "danger")  # Flash the message
+        return redirect(url_for('quiz_results', quiz_id=quiz_id))
+
+    # Reset previous selections ONLY if accessed from user dashboard
+    if request.referrer and url_for('user_dashboard') in request.referrer:
+        session.pop(f'quiz_{quiz_id}_answers', None)
 
     # Retrieve session storage for answers (initialize if not exists)
     if f'quiz_{quiz_id}_answers' not in session:
@@ -441,11 +520,20 @@ def start_quiz(quiz_id, question_index):
 
     if request.method == 'POST':
         selected_option = request.form.get('selected_option')
-        action = request.form.get('action')  # Capture button action
+        action = request.form.get('action')
+
+        # If no option is selected, set selected_option to None
+        if not selected_option:
+            selected_option = None
 
         if selected_option:
-            user_answers[str(current_question.id)] = selected_option  # Save response
-            session[f'quiz_{quiz_id}_answers'] = user_answers  # Update session
+            user_answers[str(current_question.id)] = selected_option
+            session[f'quiz_{quiz_id}_answers'] = user_answers
+
+        # If time is up, redirect to results with "Time over" message
+        if remaining_time.total_seconds() <= 0:
+            flash("Time over", "danger")  # Flash the message
+            return redirect(url_for('quiz_results', quiz_id=quiz_id))
 
         # Navigation logic
         if action == "next" and question_index + 1 < len(questions):
@@ -461,8 +549,10 @@ def start_quiz(quiz_id, question_index):
         question=current_question,
         question_index=question_index,
         total_questions=len(questions),
-        selected_option=user_answers.get(str(current_question.id))  # Pass saved response
+        selected_option=user_answers.get(str(current_question.id)),
+        remaining_time=formatted_time  # Pass remaining time to template
     )
+
 from datetime import datetime
 def save_or_update_score(user_id, quiz_id, score):
     # Find the most recent score for this user and quiz on the same day
@@ -531,6 +621,7 @@ from sqlalchemy.sql import func
 @login_required
 def user_scores():
     # Get only the latest attempt per quiz
+    user_id=current_user.id
     latest_attempts = (
         db.session.query(
             Scores.quiz_id,
@@ -558,7 +649,7 @@ def user_scores():
                     "score": latest_score.total_scored  # Use the correct score
                 })
 
-    return render_template("user_scores.html", quiz_scores=quiz_scores)
+    return render_template("user_scores.html", user_id=user_id,quiz_scores=quiz_scores)
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 
