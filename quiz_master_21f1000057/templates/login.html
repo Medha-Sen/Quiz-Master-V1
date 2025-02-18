@@ -4,28 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Quiz Master</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
+
     <div class="container">
-        <h2>Welcome to Quiz Master</h2>
-        <h3 class="subheading">Login</h3>
+        <h2>Welcome to <span class="highlight">Quiz Master</span></h2>
+        <h3 class="subheading">Login to continue</h3>
 
         <form method="POST">
             {{ form.hidden_tag() }}
 
-            <label for="username">Username (E-mail):</label>
-            {{ form.username }}
+            <div class="input-group">
+                <label for="username"><i class="fas fa-user"></i> Username (E-mail):</label>
+                {{ form.username(class="input-field", placeholder="Enter your email") }}
+            </div>
 
-            <label for="password">Password:</label>
-            {{ form.password }}
+            <div class="input-group">
+                <label for="password"><i class="fas fa-lock"></i> Password:</label>
+                {{ form.password(class="input-field", placeholder="Enter your password") }}
+            </div>
 
-            <br>
             <div class="form-buttons">
                 {{ form.submit(class="btn") }}
-                <a href="{{ url_for('register') }}" class="new-user-btn">Create new user?</a>
             </div>
+
+            <p class="new-user">
+                Don't have an account? <a href="{{ url_for('register') }}" class="new-user-btn">Register here</a>
+            </p>
         </form>
     </div>
+
 </body>
 </html>

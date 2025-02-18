@@ -1,19 +1,147 @@
+/* Global Styles */
 body {
-    background-color: #f4f7fc;
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to right, #6a11cb, #2575fc); /* Gradient background */
+    color: #333;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
 }
-.container {
-    margin-top: 30px;
+
+h1, h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
 }
-.table th, .table td {
-    text-align: center;
-}
+
 h1 {
-    text-align: center;
-    margin-bottom: 30px;
+    color: #007bff;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
-.btn-back {
-    display: block;
-    margin: 30px auto;
-    width: 200px;
+
+/* Container with white card effect */
+.container {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    max-width: 90%;
+    margin: 50px auto;
+}
+
+/* Table Styles */
+.table {
+    font-size: 16px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.table th, .table td {
+    padding: 15px;
+    text-align: center;
+}
+
+.table th {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+}
+
+.table-warning {
+    background-color: #f8c75d;
+}
+
+.table-striped tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.table-bordered {
+    border: 1px solid #ddd;
+}
+
+.table td {
+    background-color: #fff;
+    color: #555;
+}
+
+/* Chart Section */
+.my-4 {
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
+
+.shadow-lg {
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Styles */
+.btn {
+    font-size: 18px;
+    font-weight: 600;
+    padding: 12px 25px;
+    border-radius: 25px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 30px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    .table th, .table td {
+        padding: 10px;
+    }
+
+    .btn {
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .my-4 {
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+}
+
+@media (max-width: 576px) {
+    .table th, .table td {
+        font-size: 14px;
+        padding: 8px;
+    }
 }

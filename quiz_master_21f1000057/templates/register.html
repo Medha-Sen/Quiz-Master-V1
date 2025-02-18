@@ -4,37 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Quiz Master</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
+
     <div class="container">
-        <h2>Welcome to Quiz Master</h2>
-        <h3 class="subheading">Registration</h3>
+        <h2>Join <span class="highlight">Quiz Master</span></h2>
+        <h3 class="subheading">Create Your Account</h3>
 
         <form method="POST">
             {{ form.hidden_tag() }}
 
-            <label for="username">User Name (E-mail):</label>
-            {{ form.username }}
+            <div class="input-group">
+                <label for="username"><i class="fas fa-envelope"></i> User Name (E-mail):</label>
+                {{ form.username(class="input-field", placeholder="Enter your email") }}
+            </div>
 
-            <label for="password">Password:</label>
-            {{ form.password }}
+            <div class="input-group">
+                <label for="password"><i class="fas fa-lock"></i> Password:</label>
+                {{ form.password(class="input-field", placeholder="Create a strong password") }}
+            </div>
 
-            <label for="full_name">Full Name:</label>
-            {{ form.full_name }}
+            <div class="input-group">
+                <label for="full_name"><i class="fas fa-user"></i> Full Name:</label>
+                {{ form.full_name(class="input-field", placeholder="Enter your full name") }}
+            </div>
 
-            <label for="qualification">Qualification:</label>
-            {{ form.qualification }}
+            <div class="input-group">
+                <label for="qualification"><i class="fas fa-graduation-cap"></i> Qualification:</label>
+                {{ form.qualification(class="input-field", placeholder="Your qualification") }}
+            </div>
 
-            <label for="dob">Date of Birth:</label>
-            {{ form.dob }}
+            <div class="input-group">
+                <label for="dob"><i class="fas fa-calendar-alt"></i> Date of Birth:</label>
+                {{ form.dob(class="input-field", placeholder="DD/MM/YYYY") }}
+            </div>
 
-            <br>
             <div class="form-buttons">
                 {{ form.submit(class="btn") }}
-                <a href="{{ url_for('login') }}" class="existing-user-btn">Existing user?</a>
             </div>
+
+            <p class="existing-user">
+                Already have an account? <a href="{{ url_for('login') }}" class="existing-user-btn">Login here</a>
+            </p>
         </form>
     </div>
+
 </body>
 </html>

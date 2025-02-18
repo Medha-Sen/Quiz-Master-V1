@@ -5,27 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scores</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_scores.css') }}">
 </head>
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
-            <div class="nav-links">
-                <a href="{{ url_for('user_dashboard') }}">Home</a> |
-                <a href="{{ url_for('user_scores') }}">Scores</a> |
-                <a href="{{ url_for('user_summary',user_id=user_id) }}">Summary</a> |
-                <a href="{{ url_for('logout') }}">Logout</a>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('user_dashboard') }}">Quiz Master</a>
+
+            <!-- Toggle Button for Mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('user_dashboard') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('user_scores') }}">Scores</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('user_summary', user_id=user_id) }}">Summary</a></li>
+                    <li class="nav-item"><a class="nav-link logout-btn" href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+
+                <!-- Search Bar -->
+                <form class="d-flex search-form" method="GET" action="{{ url_for('user_scores') }}">
+                    <input type="text" class="form-control search-input" name="search"
+                        placeholder="Search for Quiz Scores" value="{{ request.args.get('search', '') }}">
+                    <button type="submit" class="btn search-button">🔍</button>
+                </form>
+
+                <span class="user-welcome">Welcome, {{ current_user.name }}</span>
             </div>
-
-            <!-- Search Bar -->
-            <form class="search-container d-flex">
-                <input type="text" class="form-control search-input" placeholder="Search">
-                <button type="submit" class="btn search-button">🔍</button>
-            </form>
-
-            <span class="user-welcome">Welcome {{ current_user.name }}</span>
         </div>
     </nav>
 
@@ -37,10 +47,10 @@
         <table class="table table-bordered text-center mt-3">
             <thead class="table-light">
                 <tr>
-                    <th>ID</th>
-                    <th>No. of Questions</th>
-                    <th>Date</th>
-                    <th>Score</th>
+                    <th><div class="yellow-panel"></div>Quiz ID</th>
+                    <th><div class="yellow-panel"></div>No. of Questions</th>
+                    <th><div class="yellow-panel"></div>Date of Attempt</th>
+                    <th><div class="yellow-panel"></div>Recent Score</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,6 +68,8 @@
         <p class="text-center mt-4">No quizzes attempted yet.</p>
         {% endif %}
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

@@ -84,6 +84,7 @@ def login():
 def user_dashboard():
     search_query = request.args.get('search')  # Retrieve search query
     user_id = current_user.id
+    current_date = datetime.now().date()
     if search_query:
         # Process the search and filter results based on Subject or Chapter
         subject_filter = Subject.query.filter(Subject.name.ilike(f'%{search_query}%')).all()
@@ -103,13 +104,13 @@ def user_dashboard():
         upcoming_quizzes = list(set(quizzes))
 
         if not upcoming_quizzes:
-            return render_template('user_dashboard.html', upcoming_quizzes=None)  # No quizzes found
+            return render_template('user_dashboard.html', user_id=user_id, upcoming_quizzes=None)  # No quizzes found
     else:
         # Show all quizzes if no search query
         upcoming_quizzes = Quiz.query.order_by(Quiz.date_of_quiz.asc()).all()
 
     # Return the dashboard with upcoming quizzes
-    return render_template('user_dashboard.html', upcoming_quizzes=upcoming_quizzes, user_id=user_id)
+    return render_template('user_dashboard.html', upcoming_quizzes=upcoming_quizzes, user_id=user_id,current_date=current_date)
 
 @app.route('/search_quizzes', methods=['GET'])
 @login_required
@@ -782,6 +783,66 @@ def generate_chart_image(highest_scores):
     # Encode the image as a base64 string
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
     return img_base64
+### Developing API endpoints
+from flask import Flask, jsonify
+# Route to get all subjects
+@app.route('/api/subjects', methods=['GET'])
+def get_subjects():
+    subjects = Subject.query.all()  # Fetch all subjects
+    subjects_list = [{"id": subject.id, "name": subject.name, "description": subject.description} for subject in subjects]
+    return jsonify({"subjects": subjects_list})
+
+# Route to get all chapters for a specific subject (subject_id)
+@app.route('/api/subjects/<int:subject_id>/chapters', methods=['GET'])
+def get_chapters(subject_id):
+    chapters = Chapter.query.filter_by(subject_id=subject_id).all()  # Fetch chapters by subject_id
+    chapters_list = [{"id": chapter.id, "name": chapter.name, "description": chapter.description} for chapter in chapters]
+    return jsonify({"chapters": chapters_list})
+
+# Route to get all quizzes for a specific chapter (chapter_id)
+@app.route('/api/chapters/<int:chapter_id>/quizzes', methods=['GET'])
+def get_quizzes(chapter_id):
+    quizzes = Quiz.query.filter_by(chapter_id=chapter_id).all()  # Fetch quizzes by chapter_id
+    quizzes_list = [
+        {
+            "id": quiz.id,
+            "date_of_quiz": quiz.date_of_quiz,
+            "time_duration": quiz.time_duration,
+            "remarks": quiz.remarks,
+            "subject_name": quiz.get_subject_name(),
+            "chapter_name": quiz.get_chapter_name(),
+            "num_questions": quiz.num_questions()
+        }
+        for quiz in quizzes
+    ]
+    return jsonify({"quizzes": quizzes_list})
+
+# Route to get all scores for a specific user (user_id)
+@app.route('/api/users/<int:user_id>/scores', methods=['GET'])
+def get_scores(user_id):
+    user = User.query.get(user_id)  # Fetch the user by user_id
+    if not user:
+        return jsonify({"error": "User not found"}), 404  # Return an error if user is not found
+
+    scores = Scores.query.filter_by(user_id=user_id).all()  # Fetch scores by user_id
+    scores_list = [
+        {
+            "score_id": score.id,
+            "quiz_id": score.quiz_id,
+            "subject_name": score.quiz.get_subject_name(),  # Fetch subject name from the quiz
+            "chapter_name": score.quiz.get_chapter_name(),  # Fetch chapter name from the quiz
+            "time_stamp_of_attempt": score.time_stamp_of_attempt,
+            "total_score": score.total_scored
+        }
+        for score in scores
+    ]
+    
+    # Return user name first followed by the scores
+    return jsonify({
+        "user_name": user.full_name,  # Display the user's full name first
+        "scores": scores_list
+    })
+
 
 if __name__ == '__main__':
     with app.app_context():

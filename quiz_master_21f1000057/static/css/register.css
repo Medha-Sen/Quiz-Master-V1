@@ -1,0 +1,107 @@
+/* General Styling */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+/* Centering Container */
+.container {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    width: 350px;
+}
+
+/* Header Styling */
+h2 {
+    font-size: 2rem;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.subheading {
+    font-size: 1.2rem;
+    color: #f1f1f1;
+    margin-bottom: 20px;
+}
+
+/* Input Fields */
+.input-group {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.9rem;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.input-group i {
+    margin-right: 8px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.input-field::placeholder {
+    color: #ddd;
+}
+
+/* Button Styling */
+.form-buttons {
+    margin-top: 20px;
+}
+
+.btn {
+    width: 100%;
+    padding: 12px;
+    background: #ffeb3b;
+    color: #333;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn:hover {
+    background: #ffdf00;
+    transform: translateY(-2px);
+}
+
+/* Existing User Link */
+.existing-user {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.existing-user-btn {
+    color: #ffeb3b;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.existing-user-btn:hover {
+    text-decoration: underline;
+}
