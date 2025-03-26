@@ -78,7 +78,6 @@ h2, h3 {
     font-size: 18px;
     font-weight: 600;
 }
-
 /* Card Styling */
 .card {
     border-radius: 8px;
@@ -87,8 +86,7 @@ h2, h3 {
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transform: scale(1.03);
 }
 
 .card-header {
@@ -223,30 +221,39 @@ h2, h3 {
     background-color: #0056b3;
 }
 
-/* Responsive Styling */
-@media (max-width: 768px) {
-    .navbar .nav-links {
-        display: block;
-        margin-top: 10px;
-    }
-
-    .navbar .nav-links a {
-        margin-bottom: 10px;
-    }
-
-    .search-container {
-        margin-top: 10px;
-    }
-
-    .container {
-        padding: 15px;
-    }
-
-    .card {
-        margin-bottom: 20px;
-    }
-
-    .table {
-        font-size: 14px;
-    }
+.navbar .nav-links a {
+    margin-bottom: 10px;
 }
+
+.search-container {
+    margin-top: 10px;
+}
+
+.container {
+    padding: 15px;
+}
+
+
+.card {
+    transition: transform 0.3s ease-in-out;
+}
+
+
+.table {
+    font-size: 14px;
+}
+
+.quiz-card {
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+
+

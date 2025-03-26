@@ -22,7 +22,7 @@
             <!-- Search Bar -->
             <form action="{{ url_for('admin_dashboard') }}" method="GET" class="search-container d-flex">
                 <input type="text" class="form-control search-input" name="search" 
-                       placeholder="Search for Subjects and Chapter Names">
+                       placeholder="Search for Subjects and Chapter Names" value="{{ search_query }}">
                 <button type="submit" class="btn search-button">🔍</button>
             </form>
 
@@ -79,7 +79,14 @@
                 {% endfor %}
             </div>
         {% endif %}
+    {% if search_query %}
+    <div class="text-center mt-4">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary">Go Back to Home</a>
     </div>
-
+    {% endif %}
+    <div class="text-center mt-4">
+        <a href="{{ url_for('add_subject') }}" class="btn btn-primary">+ Add Subject</a>
+    </div>
+</div>
 </body>
 </html>

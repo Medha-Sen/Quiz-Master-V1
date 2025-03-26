@@ -6,19 +6,65 @@ body {
     margin-top: 80px;
 }
 .section-title {
-    color: white !important; /* Ensures the text is white */
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    font-size: 1.8rem;
+}
+
+/* Quiz Scores Table Styling */
+.table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.table thead {
+    background: linear-gradient(to right, #ff8c00, #ffeb3b); /* Gradient Yellow-Orange */
+    color: black;
     font-weight: bold;
 }
+
+.table tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #e2e6ea !important;
+}
+
+/* Score Cell */
+.score-cell {
+    font-weight: bold;
+    color: #28a745;
+}
+
+/* Yellow Panel for Headers */
+th.yellow-panel {
+    background-color: #FFEB3B;
+    padding: 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+    color: #000;
+}
+
+/* No Quizzes Alert */
 .no-quizzes-alert {
-    background-color: white; /* White panel */
-    color: #dc3545; /* Bootstrap danger red for text */
+    background-color: white;
+    color: #dc3545;
     font-weight: bold;
     padding: 20px;
     text-align: center;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     margin: 20px auto;
-    max-width: 80%; /* Adjust width to prevent it from being too wide */
+    max-width: 80%;
 }
 
 /* Navbar */
@@ -76,52 +122,3 @@ body {
     color: white;
     font-weight: bold;
 }
-
-/* Section Title */
-.section-title {
-    font-weight: bold;
-    color: #007bff;
-    margin-bottom: 15px;
-}
-
-/* Table Styling */
-.table {
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.table thead {
-    background-color: #007bff;
-    color: white;
-}
-
-.table-hover tbody tr:hover {
-    background-color: #e2e6ea;
-}
-
-.btn-outline-primary:hover {
-    background-color: #007bff;
-    color: white;
-}
-
-.btn-success {
-    background-color: #28a745;
-    border: none;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-}
-/* Add to user_scores.css */
-
-/* Style for yellow panel in headers */
-th.yellow-panel {
-    background-color: #FFEB3B;  /* Yellow background */
-    padding: 10px;              /* Padding for spacing */
-    border-radius: 5px;         /* Rounded corners */
-    font-weight: bold;          /* Bold text */
-    text-align: center;         /* Center the text */
-    color: #000;                /* Black text for contrast */
-}
-

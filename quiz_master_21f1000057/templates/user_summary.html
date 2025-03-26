@@ -10,7 +10,7 @@
 <body class="bg-light">
 
 <div class="container my-5">
-    <h1 class="text-center text-primary mb-4">User Summary</h1>
+    <h1 class="text-center text-primary mb-4">{{full_name}}'s Summary</h1>
 
     <div class="table-responsive">
         <table class="table table-striped table-bordered table-hover">
@@ -20,7 +20,8 @@
                     <th>Chapter Name</th>
                     <th>Quiz ID</th>
                     <th>Highest Score</th>
-                    <th>Total Questions</th>
+                    <th>Average Score</th>
+                    <th>Total Attempts</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,7 +31,8 @@
                     <td>{{ quiz.chapter_name }}</td>
                     <td>{{ quiz.quiz_id }}</td>
                     <td>{{ quiz.highest_score }}</td>
-                    <td>{{ quiz.total_questions }}</td>
+                    <td>{{ quiz.average_score }}</td>
+                    <td>{{ quiz.total_attempts }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

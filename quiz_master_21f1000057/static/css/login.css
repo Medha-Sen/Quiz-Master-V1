@@ -105,3 +105,17 @@ h2 {
 .new-user-btn:hover {
     text-decoration: underline;
 }
+.flash-messages {
+    margin-bottom: 15px;
+}
+
+.alert {
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.alert-danger {
+    background-color: #ff4d4d;
+    color: white;
+}

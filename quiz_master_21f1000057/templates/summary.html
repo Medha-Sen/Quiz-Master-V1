@@ -8,10 +8,17 @@
 </head>
 <body>
 
-<!-- Navigation -->
-<div class="navbar">
-    <a href="{{ url_for('summary') }}" class="nav-link"> User Performance Summary</a>
-</div>
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="container-fluid d-flex justify-content-between align-items-center px-4">
+        <div class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}" style="color: white; text-decoration: none; font-weight: bold;">Home</a> |
+            <a href="{{ url_for('quiz_management') }}" style="color: white; text-decoration: none; font-weight: bold;">Quiz</a> |
+            <a href="{{ url_for('summary') }}" style="color: white; text-decoration: none; font-weight: bold;">Summary</a> |
+            <a href="{{ url_for('logout') }}" style="color: white; text-decoration: none; font-weight: bold;">Logout</a>
+        </div>
+    </div>
+</nav>
 
 <!-- Search Bar -->
 <div class="search-container">
@@ -31,16 +38,16 @@
     {% endif %}
 {% endwith %}
 
-<!-- User List Table -->
+<!-- User Performance Summary Table -->
 <div class="table-container">
-    <h3>User List</h3>
+    <h3>User Performance Summary</h3>
     <table>
         <thead>
             <tr>
                 <th>User ID</th>
                 <th>User Name</th>
                 <th>User Email</th>
-                <th>Password</th>
+                <th>Quiz Attempts</th>
             </tr>
         </thead>
         <tbody>
@@ -49,7 +56,36 @@
                     <td><a href="{{ url_for('user_summary', user_id=user.id) }}">{{ user.id }}</a></td>
                     <td>{{ user.full_name }}</td>
                     <td>{{ user.username }}</td>
-                    <td>{{ user.password }}</td>
+                    <td>{{ user.attempt_count }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Quiz Summary Table -->
+<div class="table-container">
+    <h3>Quiz Summary</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Quiz ID</th>
+                <th>Subject Name</th>
+                <th>Chapter Name</th>
+                <th>Date of Quiz</th>
+                <th>Time Duration (Hours: mins)</th>
+                <th>Number of Attempts</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for quiz in quizzes %}
+                <tr>
+                    <td>{{ quiz.id }}</td>
+                    <td>{{ quiz.subject_name }}</td>
+                    <td>{{ quiz.chapter_name }}</td>
+                    <td>{{ quiz.date_of_quiz.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ quiz.time_duration }}</td>
+                    <td>{{ quiz.attempt_count }}</td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -58,9 +94,10 @@
 
 <!-- Display the Chart Image -->
 <div class="chart-container">
-    <h3>Highest Scores per Subject</h3>
-    <img src="data:image/png;base64,{{ chart_image }}" alt="Highest Scores Chart" class="chart-image">
+    <h3>Quiz Attempts per Chapter</h3>
+    <img src="data:image/png;base64,{{ chart_image }}" alt="Quiz Attempts Chart" class="chart-image">
 </div>
+
 
 <!-- Back to Home Button -->
 <div class="back-button-container">

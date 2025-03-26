@@ -77,20 +77,23 @@ def login():
             print(f"Logged in as: {current_user.__class__.__name__}")  # Check the class of current_user
             return redirect(url_for('user_dashboard'))
         else:
+            print("Flash message triggered!")
             flash('Login Unsuccessful. Please check username and password', 'danger')
+            return redirect(url_for('login'))
     return render_template('login.html', form=form)
 @app.route('/user_dashboard', methods=['GET'])
 @login_required
 def user_dashboard():
-    search_query = request.args.get('search')  # Retrieve search query
+    search_query = request.args.get('search')  
     user_id = current_user.id
+    full_name = current_user.full_name  # Get the full name of the logged-in user
     current_date = datetime.now().date()
+
+    print(f"Debug: User full name -> {full_name}")  # Debugging line
+
     if search_query:
-        # Process the search and filter results based on Subject or Chapter
         subject_filter = Subject.query.filter(Subject.name.ilike(f'%{search_query}%')).all()
         chapter_filter = Chapter.query.filter(Chapter.name.ilike(f'%{search_query}%')).all()
-
-        # Get quizzes associated with these subjects and chapters
         quizzes = []
         for subject in subject_filter:
             for chapter in subject.chapters:
@@ -99,18 +102,14 @@ def user_dashboard():
         for chapter in chapter_filter:
             for quiz in chapter.quizzes:
                 quizzes.append(quiz)
-
-        # Remove duplicates by converting to a set and back to a list
         upcoming_quizzes = list(set(quizzes))
-
         if not upcoming_quizzes:
-            return render_template('user_dashboard.html', user_id=user_id, upcoming_quizzes=None)  # No quizzes found
+            return render_template('user_dashboard.html', user_id=user_id, full_name=full_name, upcoming_quizzes=None)
+
     else:
-        # Show all quizzes if no search query
         upcoming_quizzes = Quiz.query.order_by(Quiz.date_of_quiz.asc()).all()
 
-    # Return the dashboard with upcoming quizzes
-    return render_template('user_dashboard.html', upcoming_quizzes=upcoming_quizzes, user_id=user_id,current_date=current_date)
+    return render_template('user_dashboard.html', upcoming_quizzes=upcoming_quizzes, user_id=user_id, full_name=full_name, current_date=current_date)
 
 @app.route('/search_quizzes', methods=['GET'])
 @login_required
@@ -204,15 +203,22 @@ def edit_subject(subject_id):
 
     return render_template('edit_subject.html', subject=subject)  # Pass subject data to template
 #Deleting a subject
-@app.route('/delete_subject/<int:subject_id>', methods=['GET'])
+@app.route('/delete_subject/<int:subject_id>', methods=['GET', 'POST'])
 def delete_subject(subject_id):
     subject = Subject.query.get_or_404(subject_id)  # Get the subject by ID
 
-    # Delete the subject from the database
+    # Get all chapters related to this subject and delete them properly
+    chapters = Chapter.query.filter_by(subject_id=subject_id).all()
+    for chapter in chapters:
+        delete_chapter(chapter.id)  # Calls the function
+
+    # Now delete the subject
     db.session.delete(subject)
     db.session.commit()
 
-    return redirect(url_for('admin_dashboard'))  # Redirect to the admin dashboard after deletion
+    return redirect(url_for('admin_dashboard'))
+
+# Redirect to the admin dashboard after deletion
 
 #Adding a chapter in Admin Dashboard
 @app.route('/add_chapter/<int:subject_id>', methods=['GET', 'POST'])
@@ -255,10 +261,17 @@ def edit_chapter(chapter_id):
 def delete_chapter(chapter_id):
     chapter = Chapter.query.get_or_404(chapter_id)  # Get the chapter by ID
 
-    db.session.delete(chapter)  # Delete the chapter from the database
-    db.session.commit()  # Commit the changes to the database
+    # Get all quizzes related to this chapter and delete them properly
+    quizzes = Quiz.query.filter_by(chapter_id=chapter_id).all()
+    for quiz in quizzes:
+        delete_quiz(quiz.id)  # Calls the delete_quiz function
 
-    return redirect(url_for('admin_dashboard'))  # Redirect back to the dashboard after deleting
+    # Now delete the chapter
+    db.session.delete(chapter)
+    db.session.commit()
+
+    return redirect(url_for('admin_dashboard'))
+# Redirect back to the dashboard after deleting
 #Quiz Management
 @app.route('/quiz_management', methods=['GET', 'POST'])
 def quiz_management():
@@ -372,8 +385,6 @@ def edit_quiz(quiz_id):
             # Debugging: Print updated quiz details
             updated_quiz = Quiz.query.get(quiz.id)
             print(f"Updated Quiz in DB: {updated_quiz.date_of_quiz}, {updated_quiz.time_duration}, {updated_quiz.remarks}")
-
-            flash("Quiz updated successfully.", "success")
             # After successful update, redirect to quiz management page
             return redirect(url_for('quiz_management'))
 
@@ -394,16 +405,29 @@ def edit_quiz(quiz_id):
 @app.route('/delete_quiz/<int:quiz_id>', methods=['GET', 'POST'])
 def delete_quiz(quiz_id):
     print(f"Trying to delete quiz with ID: {quiz_id}")  # Debugging
-    quiz = Quiz.query.get_or_404(quiz_id)
 
+    quiz = Quiz.query.get_or_404(quiz_id)
+    
     if quiz:
+        # 1️⃣ Delete all scores associated with this quiz
+        Scores.query.filter_by(quiz_id=quiz_id).delete()
+        print(f"Deleted all scores related to quiz {quiz_id}")
+
+        # 2️⃣ Delete all questions related to this quiz
+        Questions.query.filter_by(quiz_id=quiz_id).delete()
+        print(f"Deleted all questions related to quiz {quiz_id}")
+
+        # 3️⃣ Delete the quiz itself
         db.session.delete(quiz)
         db.session.commit()
-        print("Quiz deleted!")  # Debugging
+        print(f"Quiz {quiz_id} deleted successfully!")
+
     else:
-        print("Quiz not found!")  # Debugging
+        print(f"Quiz {quiz_id} not found!")
 
     return redirect(url_for('quiz_management'))
+
+
 
 @app.route('/add_question/<int:quiz_id>', methods=['GET', 'POST'])
 def add_question(quiz_id):
@@ -556,19 +580,15 @@ def start_quiz(quiz_id, question_index):
 
 from datetime import datetime
 def save_or_update_score(user_id, quiz_id, score):
-    # Find the most recent score for this user and quiz on the same day
-    existing_score = Scores.query.filter_by(user_id=user_id, quiz_id=quiz_id).filter(Scores.time_stamp_of_attempt >= datetime.utcnow().date()).first()
-
-    if existing_score:
-        # Update the existing score if the user has already attempted this quiz today
-        existing_score.total_scored = score
-        existing_score.time_stamp_of_attempt = datetime.utcnow()  # Update the timestamp to current time
-    else:
-        # If no score exists for today, create a new score record
-        new_score = Scores(user_id=user_id, quiz_id=quiz_id, total_scored=score, time_stamp_of_attempt=datetime.utcnow())
-        db.session.add(new_score)
-
-    db.session.commit()  # Save changes to the database
+    # Always create a new entry for every attempt
+    new_score = Scores(
+        user_id=user_id,
+        quiz_id=quiz_id,
+        total_scored=score,
+        time_stamp_of_attempt=datetime.utcnow()
+    )
+    db.session.add(new_score)
+    db.session.commit()  # Don't forget to commit the transaction!
 
 @app.route('/quiz-results/<int:quiz_id>')
 @login_required
@@ -621,116 +641,165 @@ from sqlalchemy.sql import func
 @app.route('/user-scores')
 @login_required
 def user_scores():
-    # Get only the latest attempt per quiz
-    user_id=current_user.id
-    latest_attempts = (
+    user_id = current_user.id
+    full_name = current_user.full_name  # Get the full name of the logged-in user
+
+    # Fetch all quiz attempts for the user, ordered by quiz_id first and then by latest attempt
+    all_attempts = (
         db.session.query(
             Scores.quiz_id,
-            func.max(Scores.time_stamp_of_attempt).label('latest_attempt')
+            Scores.time_stamp_of_attempt,
+            Scores.total_scored,
+            Quiz.chapter_id
         )
-        .filter(Scores.user_id == current_user.id)  # Only the logged-in user's scores
-        .group_by(Scores.quiz_id)  # Group by quiz_id to get only the latest attempt
+        .join(Quiz, Scores.quiz_id == Quiz.id)
+        .filter(Scores.user_id == user_id)  # Filter only the logged-in user's scores
+        .order_by(Scores.time_stamp_of_attempt.desc()) # Ensures proper sorting
         .all()
     )
 
-    # Fetch quiz details and scores using the quiz_id
     quiz_scores = []
-    for quiz_id, latest_attempt in latest_attempts:
-        # Get the score for the latest attempt by the user for the specific quiz
-        latest_score = Scores.query.filter_by(quiz_id=quiz_id, user_id=current_user.id, time_stamp_of_attempt=latest_attempt).first()
+    for quiz_id, time_stamp, score, chapter_id in all_attempts:
+        # Fetch quiz and chapter details
+        quiz = Quiz.query.get(quiz_id)
+        chapter = Chapter.query.get(chapter_id)
 
-        # If the latest score is found, fetch quiz details
-        if latest_score:
-            quiz = Quiz.query.get(quiz_id)  # Get quiz details
-            if quiz:
-                quiz_scores.append({
-                    "id": quiz.id,
-                    "num_questions": quiz.num_questions(),  # Assuming you have this function
-                    "date": latest_attempt.strftime('%d/%m/%Y'),  # Extract date only
-                    "score": latest_score.total_scored  # Use the correct score
-                })
+        subject_name = chapter.subject.name if chapter and chapter.subject else "Unknown Subject"
+        chapter_name = chapter.name if chapter else "Unknown Chapter"
 
-    return render_template("user_scores.html", user_id=user_id,quiz_scores=quiz_scores)
+        # Get number of questions in the quiz
+        num_questions = Questions.query.filter_by(quiz_id=quiz_id).count()
+
+        quiz_scores.append({
+            "id": quiz_id,
+            "num_questions": num_questions,  # Correct way to fetch number of questions
+            "date": time_stamp.strftime('%d/%m/%Y %H:%M'),  # Format date with time
+            "score": score,
+            "subject_name": subject_name,
+            "chapter_name": chapter_name
+        })
+
+    return render_template("user_scores.html", user_id=user_id, full_name=full_name, quiz_scores=quiz_scores)
+
+
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 
 def get_quiz_scores(user_id):
     quiz_scores = []
-    
+
     # Fetch all quizzes and their associated scores for the given user
     quizzes = db.session.query(Quiz, Scores).join(Scores, Scores.quiz_id == Quiz.id) \
         .filter(Scores.user_id == user_id) \
         .options(joinedload(Quiz.chapter).joinedload(Chapter.subject)) \
         .all()
 
-    # Aggregate the highest score per quiz
-    unique_quiz_ids = set()
-    for quiz, score in quizzes:
-        if quiz.id not in unique_quiz_ids:
-            unique_quiz_ids.add(quiz.id)
-            subject_name = quiz.get_subject_name()
-            chapter_name = quiz.get_chapter_name()
-            highest_score = db.session.query(func.max(Scores.total_scored)) \
-                .filter(Scores.quiz_id == quiz.id).scalar()  # Get highest score for this quiz
-            total_questions = quiz.num_questions()
+    # Dictionary to store aggregated quiz data
+    quiz_data = {}
 
-            quiz_scores.append({
-                'subject_name': subject_name,
-                'chapter_name': chapter_name,
+    for quiz, score in quizzes:
+        if quiz.id not in quiz_data:
+            quiz_data[quiz.id] = {
+                'subject_name': quiz.chapter.subject.name,
+                'chapter_name': quiz.chapter.name,
                 'quiz_id': quiz.id,
-                'highest_score': highest_score,
-                'total_questions': total_questions
-            })
+                'highest_score': 0,
+                'total_attempts': 0,
+                'total_score_sum': 0  # To calculate average
+            }
+
+        # Update highest score
+        quiz_data[quiz.id]['highest_score'] = max(quiz_data[quiz.id]['highest_score'], score.total_scored)
+
+        # Count total attempts and sum scores for average calculation
+        quiz_data[quiz.id]['total_attempts'] += 1
+        quiz_data[quiz.id]['total_score_sum'] += score.total_scored
+
+    # Convert collected data into a list
+    for quiz_id, data in quiz_data.items():
+        data['average_score'] = round(data['total_score_sum'] / data['total_attempts'], 2) if data['total_attempts'] > 0 else 0
+        quiz_scores.append(data)
 
     return quiz_scores
+
+import matplotlib
+matplotlib.use('Agg') 
+import matplotlib.pyplot as plt
+import io
+import base64
+
 import matplotlib.pyplot as plt
 import io
 import base64
 
 def generate_chart_images(user_id):
-    # Get the highest scores by subject
+    # Get the quiz scores data
     quiz_scores = get_quiz_scores(user_id)
 
-    subject_scores = {}
+    subject_data = {}
     for score in quiz_scores:
         subject = score['subject_name']
         highest_score = score['highest_score']
-        if subject not in subject_scores:
-            subject_scores[subject] = []
-        subject_scores[subject].append(highest_score)
+        total_attempts = score['total_attempts']
 
-    # Create a bar chart
-    subjects = list(subject_scores.keys())
-    highest_scores = [max(scores) for scores in subject_scores.values()]
+        if subject not in subject_data:
+            subject_data[subject] = {"highest_score": 0, "total_attempts": 0}
 
-    plt.figure(figsize=(8, 4))
-    plt.bar(subjects, highest_scores, color='skyblue')
-    plt.xlabel('')
-    plt.ylabel('Highest Score')
-    plt.title('Highest Scores by Subject')
+        subject_data[subject]["highest_score"] = max(subject_data[subject]["highest_score"], highest_score)
+        subject_data[subject]["total_attempts"] += total_attempts
+
+    # Extract subjects, highest scores, and total attempts
+    subjects = list(subject_data.keys())
+    highest_scores = [subject_data[sub]["highest_score"] for sub in subjects]
+    total_attempts = [subject_data[sub]["total_attempts"] for sub in subjects]
+
+    # Plot the chart with two bars per subject
+    x = range(len(subjects))
+    width = 0.4  # Bar width
+
+    plt.figure(figsize=(8, 5))
+    plt.bar(x, highest_scores, width=width, label='Highest Score', color='skyblue')
+    plt.bar([i + width for i in x], total_attempts, width=width, label='Total Attempts', color='orange')
+
+    plt.xticks([i + width / 2 for i in x], subjects, rotation=30, ha='right')
+    plt.ylabel('Value')
+    plt.title('Highest Score and Total Attempts by Subject')
+    plt.legend()
 
     # Save the plot as a PNG image
     img_stream = io.BytesIO()
-    plt.savefig(img_stream, format='png')
+    plt.savefig(img_stream, format='png', bbox_inches='tight')
     img_stream.seek(0)
 
-    # Convert image to base64 to embed in HTML
+    # Convert image to base64 for embedding in HTML
     img_base64 = base64.b64encode(img_stream.read()).decode('utf-8')
 
     return img_base64
 
-from flask import render_template
 
+from flask import render_template
 @app.route('/user_summary/<int:user_id>')
+@login_required
 def user_summary(user_id):
+    # Fetch user details
+    user = User.query.get(user_id)
+    if not user:
+        flash("User not found", "danger")
+        return redirect(url_for('user_dashboard'))
+
     quiz_scores = get_quiz_scores(user_id)
     chart_image = generate_chart_images(user_id)
     
-    return render_template('user_summary.html', quiz_scores=quiz_scores, chart_image=chart_image)
+    return render_template('user_summary.html', 
+                           quiz_scores=quiz_scores, 
+                           chart_image=chart_image, 
+                           full_name=user.full_name)
+
 import base64
 import io
 from flask import render_template, request, redirect, url_for, flash
 import matplotlib.pyplot as plt
+
 
 @app.route('/summary', methods=['GET', 'POST'])
 def summary():
@@ -744,40 +813,62 @@ def summary():
             return redirect(url_for('user_summary', user_id=user.id))
         else:
             flash('User not found!', 'error')
-    
-    # Fetch all users for the table
-    users = User.query.all()
 
-    # Fetch the highest score for each subject for the chart
-    highest_scores = db.session.query(
+    # Fetch all users and count their quiz attempts
+    users = db.session.query(
+        User.id,
+        User.full_name,
+        User.username,
+        func.count(Scores.id).label('attempt_count')  # Count quiz attempts
+    ).outerjoin(Scores, Scores.user_id == User.id) \
+     .group_by(User.id) \
+     .all()
+
+    # Fetch quiz summary
+    quizzes = db.session.query(
+        Quiz.id,
         Subject.name.label('subject_name'),
-        db.func.max(Scores.total_scored).label('highest_score')
-    ).join(Quiz, Scores.quiz_id == Quiz.id) \
-     .join(Chapter, Quiz.chapter_id == Chapter.id) \
+        Chapter.name.label('chapter_name'),
+        Quiz.date_of_quiz,
+        Quiz.time_duration,
+        func.count(Scores.id).label('attempt_count')  # Count attempts per quiz
+    ).join(Chapter, Quiz.chapter_id == Chapter.id) \
      .join(Subject, Chapter.subject_id == Subject.id) \
-     .group_by(Subject.name).all()
+     .outerjoin(Scores, Scores.quiz_id == Quiz.id) \
+     .group_by(Quiz.id, Subject.name, Chapter.name, Quiz.date_of_quiz, Quiz.time_duration) \
+     .all()
 
-    # Generate the chart image using Matplotlib
-    chart_image = generate_chart_image(highest_scores)
+    # Fetch total attempts per chapter for the bar chart
+    chapter_attempts = db.session.query(
+        Chapter.name.label('chapter_name'),
+        func.count(Scores.id).label('total_attempts')
+    ).join(Quiz, Quiz.chapter_id == Chapter.id) \
+     .outerjoin(Scores, Scores.quiz_id == Quiz.id) \
+     .group_by(Chapter.name) \
+     .all()
 
-    return render_template('summary.html', users=users, highest_scores=highest_scores, chart_image=chart_image)
+    # Generate the bar chart
+    chart_image = generate_chart_image(chapter_attempts)
 
-def generate_chart_image(highest_scores):
+    return render_template('summary.html', users=users, quizzes=quizzes, chart_image=chart_image)
+def generate_chart_image(chapter_attempts):
     # Create a Matplotlib figure
-    fig, ax = plt.subplots(figsize=(8, 4))
+    fig, ax = plt.subplots(figsize=(10, 5))
 
-    # Extract subject names and highest scores
-    subjects = [record.subject_name for record in highest_scores]
-    scores = [record.highest_score for record in highest_scores]
+    # Extract chapter names and number of attempts
+    chapters = [record.chapter_name for record in chapter_attempts]
+    attempts = [record.total_attempts for record in chapter_attempts]
 
-    ax.bar(subjects, scores, color='skyblue')
-    ax.set_xlabel('')
-    ax.set_ylabel('Highest Score')
-    ax.set_title('Highest Scores per Subject')
+    # Create a bar chart
+    ax.bar(chapters, attempts, color='lightcoral')
+    ax.set_xlabel('Chapter Name')
+    ax.set_ylabel('Number of Attempts')
+    ax.set_title('Quiz Attempts per Chapter')
+    plt.xticks(rotation=45, ha='right')
 
     # Save the figure to a BytesIO object (in-memory image)
     img = io.BytesIO()
-    fig.savefig(img, format='png')
+    fig.savefig(img, format='png', bbox_inches='tight')
     img.seek(0)
 
     # Encode the image as a base64 string

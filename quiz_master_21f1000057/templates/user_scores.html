@@ -27,45 +27,44 @@
                     <li class="nav-item"><a class="nav-link logout-btn" href="{{ url_for('logout') }}">Logout</a></li>
                 </ul>
 
-                <!-- Search Bar -->
-                <form class="d-flex search-form" method="GET" action="{{ url_for('user_scores') }}">
-                    <input type="text" class="form-control search-input" name="search"
-                        placeholder="Search for Quiz Scores" value="{{ request.args.get('search', '') }}">
-                    <button type="submit" class="btn search-button">🔍</button>
-                </form>
-
-                <span class="user-welcome">Welcome, {{ current_user.name }}</span>
+                <span class="user-welcome">Welcome, {{ full_name }}</span>
             </div>
         </div>
     </nav>
 
     <!-- Quiz Scores Table -->
     <div class="container mt-4">
-        <h3 class="text-center">Quiz Scores</h3>
+        <h3 class="text-center section-title">📊 Your Quiz Scores</h3>
 
         {% if quiz_scores %}
-        <table class="table table-bordered text-center mt-3">
-            <thead class="table-light">
-                <tr>
-                    <th><div class="yellow-panel"></div>Quiz ID</th>
-                    <th><div class="yellow-panel"></div>No. of Questions</th>
-                    <th><div class="yellow-panel"></div>Date of Attempt</th>
-                    <th><div class="yellow-panel"></div>Recent Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for quiz in quiz_scores %}
-                <tr>
-                    <td>{{ quiz.id }}</td>
-                    <td>{{ quiz.num_questions }}</td>
-                    <td>{{ quiz.date }}</td>
-                    <td>{{ quiz.score }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-hover text-center mt-3">
+                <thead>
+                    <tr>
+                        <th class="yellow-panel">Quiz ID</th>
+                        <th class="yellow-panel">Subject Name</th>
+                        <th class="yellow-panel">Chapter Name</th>
+                        <th class="yellow-panel">No. of Questions</th>
+                        <th class="yellow-panel">Date of Attempt</th>
+                        <th class="yellow-panel">Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for quiz in quiz_scores %}
+                    <tr>
+                        <td><strong>{{ quiz.id }}</strong></td>
+                        <td>{{ quiz.subject_name }}</td>
+                        <td>{{ quiz.chapter_name }}</td>
+                        <td>{{ quiz.num_questions }}</td>
+                        <td>{{ quiz.date }}</td>
+                        <td class="score-cell">{{ quiz.score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         {% else %}
-        <p class="text-center mt-4">No quizzes attempted yet.</p>
+        <p class="no-quizzes-alert">⚠️ No quizzes attempted yet.</p>
         {% endif %}
     </div>
 

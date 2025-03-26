@@ -34,7 +34,7 @@
                     <button type="submit" class="btn search-button">🔍</button>
                 </form>
 
-                <span class="user-welcome">Welcome, {{ current_user.name }}</span>
+                <span class="user-welcome">Welcome, {{ full_name }}</span>
             </div>
         </div>
     </nav>
@@ -46,12 +46,12 @@
     </div>
     {% endif %}
 
-    <!-- Error Message if no subjects or chapters found -->
+    <!-- Error Message if no quizzes found -->
     {% if request.args.get('search') and not upcoming_quizzes %}
     <div class="container mt-4">
-        <div class="no-quizzes-alert">
-            <h5 class="text-danger">404 Subject/Chapter Not Found</h5>
-            <p>We couldn't find any subjects or chapters matching your search.</p>
+        <div class="alert alert-danger text-center">
+            <h5>404 Subject/Chapter Not Found</h5>
+            <p>No quizzes found matching your search.</p>
         </div>
     </div>
     {% endif %}
@@ -61,38 +61,32 @@
         <h3 class="text-center section-title">📅 Upcoming Quizzes</h3>
 
         {% if not upcoming_quizzes %}
-        <div class="alert alert-danger text-center">🚫 No quizzes found for the searched subject or chapter.</div>
+        <div class="alert alert-danger text-center">🚫 No quizzes found.</div>
         {% else %}
-        <div class="table-responsive">
-            <table class="table table-hover mt-3">
-                <thead class="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Questions</th>
-                        <th>Date</th>
-                        <th>Duration</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for quiz in upcoming_quizzes %}
-                    <tr>
-                        <td>{{ quiz.id }}</td>
-                        <td>{{ quiz.num_questions() }}</td>
-                        <td>{{ quiz.date_of_quiz.strftime('%d/%m/%Y') }}</td>
-                        <td>{{ quiz.time_duration }}</td>
-                        <td>
-                            {% if quiz.date_of_quiz < current_date %}
-                            <span class="text-danger">❌ Expired</span>
+        <div class="row">
+            {% for quiz in upcoming_quizzes %}
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">📖 {{ quiz.get_subject_name() }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">📚 Chapter: {{ quiz.get_chapter_name() }}</h6>
+                        <p class="card-text">
+                            📅 Date: <strong>{{ quiz.date_of_quiz.strftime('%d/%m/%Y') }}</strong><br>
+                            ⏳ Duration: <strong>{{ quiz.time_duration }} mins</strong><br>
+                            ❓ Questions: <strong>{{ quiz.num_questions() }}</strong>
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('quiz_info', quiz_id=quiz.id) }}" class="btn btn-outline-primary">View</a>
+                            {% if quiz.date_of_quiz >= current_date %}
+                            <a href="{{ url_for('start_quiz', quiz_id=quiz.id, question_index=0) }}" class="btn btn-success">Attempt</a>
                             {% else %}
-                            <a href="{{ url_for('quiz_info', quiz_id=quiz.id) }}" class="btn btn-outline-primary btn-sm">View</a>
-                            <a href="{{ url_for('start_quiz', quiz_id=quiz.id, question_index=0) }}" class="btn btn-success btn-sm">Start</a>
+                            <button class="btn btn-danger" disabled>Expired</button>
                             {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
         {% endif %}
     </div>

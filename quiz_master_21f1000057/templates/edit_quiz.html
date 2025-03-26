@@ -17,20 +17,22 @@
             <div class="card-body">
                 <h4 class="card-title text-success">Edit {{ quiz.get_subject_name() }} Quiz: {{ quiz.get_chapter_name() }}</h4>
                 
-                <!-- Date of Quiz -->
+                <!-- Date of Quiz Section -->
+                <h5 class="mt-3 text-secondary">Quiz Date</h5> 
                 <div class="mb-3">
                     <label for="date_of_quiz" class="form-label">Date of Quiz</label>
-                    <!-- Correct date format for <input type="date"> (yyyy-mm-dd) -->
                     <input type="date" class="form-control" id="date_of_quiz" name="date_of_quiz" value="{{ quiz.date_of_quiz.strftime('%Y-%m-%d') }}">
                 </div>
 
-                <!-- Duration (HH:MM) -->
+                <!-- Duration Section -->
+                <h5 class="mt-3 text-secondary">Duration</h5> 
                 <div class="mb-3">
                     <label for="time_duration" class="form-label">Duration (HH:MM)</label>
                     <input type="text" class="form-control" id="time_duration" name="time_duration" value="{{ quiz.time_duration }}">
                 </div>
 
-                <!-- Remarks -->
+                <!-- Remarks Section -->
+                <h5 class="mt-3 text-secondary">Additional Remarks</h5> 
                 <div class="mb-3">
                     <label for="remarks" class="form-label">Remarks</label>
                     <textarea class="form-control" id="remarks" name="remarks">{{ quiz.remarks if quiz.remarks else '' }}</textarea>
